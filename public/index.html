@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Restaurant Finder</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f6fa;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      width: 250px;
+    }
+
+    button {
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 10px;
+      color: blue;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🍽 Restaurant Finder</h1>
+
+  <input id="cityInput" placeholder="Enter city (e.g. Bangalore)">
+  <button onclick="searchCity()">Search</button>
+
+  <h2 id="title"></h2>
+
+  <div id="results" class="grid"></div>
+
+  <script>
+    async function searchCity() {
+      const city = document.getElementById("cityInput").value;
+
+      if (!city) {
+        alert("Enter a city");
+        return;
+      }
+
+      document.getElementById("results").innerHTML = "Loading...";
+
+      const res = await fetch(`/search?city=${city}`);
+      const data = await res.json();
+
+      renderResults(data);
+    }
+
+    function renderResults(data) {
+      const container = document.getElementById("results");
+
+      if (data.error) {
+        container.innerHTML = data.error;
+        return;
+      }
+
+      document.getElementById("title").innerText =
+        `Restaurants in ${data.city}`;
+
+      container.innerHTML = data.results.map(place => `
+        <div class="card">
+          <h3>${place.name}</h3>
+          <p>⭐ ${place.rating || "N/A"}</p>
+          <p>📍 ${place.vicinity || "No address"}</p>
+
+          <a href="https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat},${place.geometry.location.lng}" target="_blank">
+            View on Map
+          </a>
+        </div>
+      `).join("");
+    }
+  </script>
+
+</body>
+</html>
